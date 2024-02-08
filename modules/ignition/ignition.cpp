@@ -6,22 +6,18 @@
 
 //=====[Declaration of private defines]========================================
 
-#define DUTY_MIN 0.029
-#define DUTY_MAX 0.118
-#define PERIOD 0.02
-
 //=====[Declaration of private data types]=====================================
 
 //=====[Declaration and initialization of public global objects]===============
 
 // Inputs
 
-AnalogIn modeSelector(A2);
-AnalogIn intervalSelector(A3);
+DigitalIn driverSeatSensor(D10);
+DigitalIn ignitionButton(USER_BUTTON);
 
 // Outputs
 
-PwmOut wipers(PF_9);
+DigitalOut ignitionLed(LED2);
 
 //=====[Declaration of external public global variables]=======================
 
@@ -29,25 +25,44 @@ PwmOut wipers(PF_9);
 
 //=====[Declaration and initialization of private global variables]============
 
+bool engineOn = OFF;
+
 //=====[Declarations (prototypes) of private functions]========================
 
-void initialize();
+void ignitionInit();
+void checkIgnitionSubsystem();
+
+bool isEngineOn();
 
 //=====[Implementations of public functions]===================================
 
 //=====[Implementations of private functions]==================================
 
-int main()
-{   
-    initialize();
+void ignitionInit() {
+    driverSeatSensor.mode(PullDown);
+    ignitionLed = OFF;
+}
 
-    while (true) {
-        checkIgnitionSubsystem();
+/***
+    Run logic for checking ignition subsystem
+    - logic for turning engine on/off
+    - logic for turning blue indicator on/off
+***/
+void checkIgnitionSubsystem() {
+    if(driverSeatSensor == ON && ignitionButton == ON && !isEngineOn()) {
+        while(ignitionButton == ON) {} // delay until it goes off
+        // Ignition is released
+        engineOn = ON;
     }
+
+    if(ignitionButton == ON && isEngineOn()) {
+        while(ignitionButton == ON) {}
+        engineOn = OFF;
+    }
+
+    ignitionLed = engineOn;
 }
 
-
-void initialize() {
-    ignitionInit();
+bool isEngineOn() {
+    return engineOn;
 }
-
