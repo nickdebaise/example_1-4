@@ -12,7 +12,7 @@
 
 // Inputs
 
-DigitalIn driverSeatSensor(D10);
+DigitalIn driverSeatSensor(D14);
 DigitalIn ignitionButton(USER_BUTTON);
 
 // Outputs
