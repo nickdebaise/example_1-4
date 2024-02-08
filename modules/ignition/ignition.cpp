@@ -49,18 +49,19 @@ void ignitionInit() {
     - logic for turning blue indicator on/off
 ***/
 void checkIgnitionSubsystem() {
-    if(driverSeatSensor == ON && ignitionButton == ON && !isEngineOn()) {
-        while(ignitionButton == ON) {} // delay until it goes off
-        // Ignition is released
-        engineOn = ON;
-    }
+    // if(driverSeatSensor == ON && ignitionButton == ON && !isEngineOn()) {
+    //     while(ignitionButton == ON) {} // delay until it goes off
+    //     // Ignition is released
+    //     engineOn = ON;
+    // }
 
-    if(ignitionButton == ON && isEngineOn()) {
-        while(ignitionButton == ON) {}
-        engineOn = OFF;
-    }
+    // if(ignitionButton == ON && isEngineOn()) {
+    //     while(ignitionButton == ON) {}
+    //     engineOn = OFF;
+    // }
 
-    ignitionLed = isEngineOn();
+    // ignitionLed = isEngineOn();
+    ignitionLed = ignitionButton;
 }
 
 bool isEngineOn() {
