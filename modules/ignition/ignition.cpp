@@ -60,7 +60,7 @@ void checkIgnitionSubsystem() {
         engineOn = OFF;
     }
 
-    ignitionLed = engineOn;
+    ignitionLed = isEngineOn();
 }
 
 bool isEngineOn() {
