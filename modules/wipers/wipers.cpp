@@ -5,6 +5,7 @@
 #include "wipers.h"
 #include "ignition.h"
 #include "display.h"
+#include <string>
 
 //=====[Declaration of private defines]========================================
 
@@ -23,11 +24,11 @@ typedef enum {
 // Inputs
 
 AnalogIn wiperModeSelector(A0);
-AnalogIn intervalSelector(A1);
+AnalogIn intervalModeSelector(A1);
 
 // Outputs
 
-PwmOut wipers(PF_9);
+PwmOut wiperMotor(PF_9);
 
 //=====[Declaration of external public global variables]=======================
 
@@ -43,8 +44,8 @@ intervalSelector_t selectedIntMode = SHORT;
 void readWiperSelectorPot();
 void readIntervalSelectorPot();
 void displaySelectedMode();
-String modeToString();
-String intervalToString();
+string modeToString();
+string intervalToString();
 
 //=====[Implementations of public functions]===================================
 
@@ -76,9 +77,9 @@ void checkWiperSubsystem() {
 
 void displaySelectedMode() {
     displayCharPositionWrite ( 0,6 );
-    displayStringWrite( modeToString() );
+    displayStringWrite( modeToString().c_str() );
     displayCharPositionWrite ( 1,7 );
-    displayStringWrite( intervalToString() );
+    displayStringWrite( intervalToString().c_str() );
 }
 
 void readWiperSelectorPot() {
@@ -96,7 +97,7 @@ void readWiperSelectorPot() {
 }
 
 void readIntervalSelectorPot() {
-    float selectorPot = intervalSelector.read();
+    float selectorPot = intervalModeSelector.read();
 
     if(selectorPot < 0.33) {
         selectedIntMode = SHORT;
@@ -107,7 +108,7 @@ void readIntervalSelectorPot() {
     }
 }
 
-String modeToString() {
+string modeToString() {
     switch(selectedMode) {
         case HI:
             return "High";
@@ -120,7 +121,7 @@ String modeToString() {
     }
 }
 
-String intervalToString() {
+string intervalToString() {
     switch(selectedIntMode) {
         case SHORT:
             return "Short";
