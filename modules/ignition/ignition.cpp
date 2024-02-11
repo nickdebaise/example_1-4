@@ -59,16 +59,20 @@ void ignitionInit() {
 void checkIgnitionSubsystem() {
     switch(buttonState) {
         case BUTTON_IDLE:
-            if(driverSeatSensor == ON && ignitionButton == ON) {
+            if(ignitionButton == ON) {
                 buttonState = BUTTON_PRESSED;
             }
             break;
         case BUTTON_PRESSED:
             if(ignitionButton == OFF) {
-                if(driverSeatSensor == ON) {
+                if(isEngineOn()) {
                     buttonState = BUTTON_RELEASED;
                 } else {
-                    buttonState = BUTTON_IDLE;
+                    if(driverSeatSensor == ON) {
+                        buttonState = BUTTON_RELEASED;
+                    } else {
+                        buttonState = BUTTON_IDLE;
+                    }
                 }
             }
             break;
@@ -76,6 +80,7 @@ void checkIgnitionSubsystem() {
             engineOn = !engineOn;
             buttonState = BUTTON_IDLE;
     }
+    
     ignitionLed = isEngineOn();
 }
 
