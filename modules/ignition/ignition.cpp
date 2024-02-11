@@ -8,6 +8,12 @@
 
 //=====[Declaration of private data types]=====================================
 
+typedef enum {
+    BUTTON_IDLE,
+    BUTTON_PRESSED,
+    BUTTON_RELEASED
+} ignitionButtonState_t;
+
 //=====[Declaration and initialization of public global objects]===============
 
 // Inputs
@@ -26,6 +32,8 @@ DigitalOut ignitionLed(LED2);
 //=====[Declaration and initialization of private global variables]============
 
 bool engineOn = OFF;
+
+ignitionButtonState_t buttonState = BUTTON_IDLE;
 
 //=====[Declarations (prototypes) of private functions]========================
 
@@ -49,17 +57,25 @@ void ignitionInit() {
     - logic for turning blue indicator on/off
 ***/
 void checkIgnitionSubsystem() {
-    if(driverSeatSensor == ON && ignitionButton == ON && !isEngineOn()) {
-        while(ignitionButton == ON) {} // delay until it goes off
-        // Ignition is released
-        engineOn = ON;
+    switch(buttonState) {
+        case BUTTON_IDLE:
+            if(driverSeatSensor == ON && ignitionButton == ON) {
+                buttonState = BUTTON_PRESSED;
+            }
+            break;
+        case BUTTON_PRESSED:
+            if(ignitionButton == OFF) {
+                if(driverSeatSensor == ON) {
+                    buttonState = BUTTON_RELEASED;
+                } else {
+                    buttonState = BUTTON_IDLE;
+                }
+            }
+            break;
+        case BUTTON_RELEASED:
+            engineOn = !engineOn;
+            buttonState = BUTTON_IDLE;
     }
-
-    if(ignitionButton == ON && isEngineOn()) {
-        while(ignitionButton == ON) {}
-        engineOn = OFF;
-    }
-
     ignitionLed = isEngineOn();
 }
 
