@@ -1,7 +1,7 @@
 //=====[#include guards - begin]===============================================
 
-#ifndef _WIPERS_H
-#define _WIPERS_H
+#ifndef _MOTOR_H
+#define _MOTOR_H
 
 //=====[Declaration of public defines]=========================================
 
@@ -9,9 +9,7 @@
 
 //=====[Declarations (prototypes) of public functions]=========================
 
-void wipersInit();
-void checkWiperSubsystem();
 
 //=====[#include guards - end]=================================================
 
-#endif // _WIPERS_H
+#endif // _MOTOR_H

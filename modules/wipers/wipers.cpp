@@ -28,8 +28,6 @@ AnalogIn intervalModeSelector(A1);
 
 // Outputs
 
-PwmOut wiperMotor(PF_9);
-
 //=====[Declaration of external public global variables]=======================
 
 //=====[Declaration and initialization of public global variables]=============
@@ -49,16 +47,16 @@ string intervalToString();
 
 //=====[Implementations of public functions]===================================
 
-void wiperInit();
+void wipersInit();
 void checkWiperSubsystem();
 
 //=====[Implementations of private functions]==================================
 
-void wiperInit() {
+void wipersInit() {
     displayInit();
     displayCharPositionWrite ( 0,0 );
     displayStringWrite( "Mode:" );
-    displayCharPositionWrite ( 1,0 );
+    displayCharPositionWrite ( 0,1 );
     displayStringWrite( "Speed:" );
 }
 
@@ -76,9 +74,9 @@ void checkWiperSubsystem() {
 }
 
 void displaySelectedMode() {
-    displayCharPositionWrite ( 0,6 );
+    displayCharPositionWrite ( 6,0 );
     displayStringWrite( modeToString().c_str() );
-    displayCharPositionWrite ( 1,7 );
+    displayCharPositionWrite ( 7,1 );
     displayStringWrite( intervalToString().c_str() );
 }
 

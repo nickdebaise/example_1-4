@@ -3,26 +3,30 @@
 #include "mbed.h"
 #include "arm_book_lib.h"
 #include "ignition.h"
-#include "wipers.h"
+
 
 //=====[Declaration of private defines]========================================
 
-#define DUTY_MIN 0.029
-#define DUTY_MAX 0.118
-#define PERIOD 0.02
+#define PERIOD 20
 
 //=====[Declaration of private data types]=====================================
 
+
+typedef enum {
+    TRANSITIONING,
+    HI,
+    LO,
+    INT,
+    W_OFF
+} motorState_t;
+
 //=====[Declaration and initialization of public global objects]===============
 
-// Inputs
-
-AnalogIn modeSelector(A2);
-AnalogIn intervalSelector(A3);
+// Ibnnputs
 
 // Outputs
 
-PwmOut wipers(PF_9);
+PwmOut wiperMotor(PF_9);
 
 //=====[Declaration of external public global variables]=======================
 
@@ -32,25 +36,23 @@ PwmOut wipers(PF_9);
 
 //=====[Declarations (prototypes) of private functions]========================
 
-void initialize();
 
 //=====[Implementations of public functions]===================================
 
+void motorInit();
+void checkMotorSubsystem();
+
 //=====[Implementations of private functions]==================================
 
-int main()
-{   
-    initialize();
+void motorInit() {
 
-    while (true) {
-        checkIgnitionSubsystem();
-        checkWiperSubsystem();
+}
+
+/***
+    Run logic for checking motor subsystem
+***/
+void checkMotorSubsystem() {
+    if(isEngineOn()) {
+
     }
 }
-
-
-void initialize() {
-    ignitionInit();
-    wipersInit();
-}
-
