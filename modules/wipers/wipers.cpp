@@ -5,6 +5,7 @@
 #include "wipers.h"
 #include "ignition.h"
 #include "display.h"
+#include "motor.h"
 #include <string>
 
 //=====[Declaration of private defines]========================================
@@ -66,6 +67,17 @@ void wipersInit() {
 void checkWiperSubsystem() {
     if(isEngineOn()) {
         readWiperSelectorPot();
+
+        if(selectedMode == INT) {
+            
+        } else if(selectedMode == LO) {
+            performLowSpeedCycle();
+        } else if(selectedMode == HI) {
+            performHighSpeedCycle();  
+        } else {
+            // do nothing
+        }
+
     } else {
         selectedMode = W_OFF;
     }

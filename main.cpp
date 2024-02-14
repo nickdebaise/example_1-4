@@ -4,6 +4,7 @@
 #include "arm_book_lib.h"
 #include "ignition.h"
 #include "wipers.h"
+#include "main.h"
 
 //=====[Declaration of private defines]========================================
 
@@ -45,6 +46,7 @@ int main()
     while (true) {
         checkIgnitionSubsystem();
         checkWiperSubsystem();
+        delay(SYSTEM_DELAY_TIME);
     }
 }
 
