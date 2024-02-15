@@ -46,7 +46,10 @@ AnalogIn intervalModeSelector(A1);
 
 // Outputs
 PwmOut wiperMotor(PF_9);
-DigitalOut blueLED(LED1);
+DigitalOut redLED(LED3);
+DigitalOut greenLED(LED1);
+
+UnbufferedSerial uartUsb(USBTX, USBRX, 115200);
 
 //=====[Declaration of external public global variables]=======================
 
@@ -78,7 +81,8 @@ void checkWiperSubsystem();
 
 void wipersInit() {
     displayInit();
-    blueLED = OFF;
+    redLED = OFF;
+    greenLED = OFF;
     displayCharPositionWrite ( 0,0 );
     displayStringWrite( "Mode:" );
     displayCharPositionWrite ( 0,1 );
@@ -97,10 +101,14 @@ void checkWiperSubsystem() {
         displaySelectedMode();
     }
 
+
     switch(motorState) {
         case IDLE:
+            uartUsb.write("IDLE MODE\r\n", 11);
+            uartUsb.write(modeToString().c_str(), 6);
             accumulatedTime = 0;
             if(!isEngineOn() || selectedMode == OFF) {
+                uartUsb.write("--\r\n", 4);
                 motorState = IDLE;
             } else {
                 if(selectedMode == HI) {
@@ -112,10 +120,10 @@ void checkWiperSubsystem() {
                 }
             }
             wiperMotor.write(DUTY_STOP);
-            blueLED = OFF;
+            redLED = OFF;
             break;
         case HI_DIR1:
-            blueLED = ON;
+            redLED = ON;
             if(accumulatedTime >= HD1_TIME) {
                 motorState = HI_DIR2;
             }
@@ -125,7 +133,7 @@ void checkWiperSubsystem() {
             wiperMotor.write(HI_DUMIN);
             break;
         case HI_DIR2:
-            blueLED = OFF;
+            redLED = OFF;
             if(accumulatedTime >= HD2_TIME + HD1_TIME) {
                 if(selectedMode == HI) {
                     accumulatedTime = 0;
@@ -140,6 +148,7 @@ void checkWiperSubsystem() {
             wiperMotor.write(HI_DUMAX);
             break;
         case LO_DIR1:
+            greenLED = ON;
             if(accumulatedTime >= LD1_TIME) {
                 motorState = LO_DIR2;
             }
@@ -149,6 +158,7 @@ void checkWiperSubsystem() {
             wiperMotor.write(LO_DUMIN);
             break;
         case LO_DIR2:
+            greenLED = OFF;
             if(accumulatedTime >= LD2_TIME + LD1_TIME) {
                 if(selectedMode == LO) {
                     accumulatedTime = 0;            
