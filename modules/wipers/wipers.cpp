@@ -46,10 +46,6 @@ AnalogIn intervalModeSelector(A1);
 
 // Outputs
 PwmOut wiperMotor(PF_9);
-DigitalOut redLED(LED3);
-DigitalOut greenLED(LED1);
-
-UnbufferedSerial uartUsb(USBTX, USBRX, 115200);
 
 //=====[Declaration of external public global variables]=======================
 
@@ -81,8 +77,6 @@ void checkWiperSubsystem();
 
 void wipersInit() {
     displayInit();
-    redLED = OFF;
-    greenLED = OFF;
     displayCharPositionWrite ( 0,0 );
     displayStringWrite( "Mode:" );
     displayCharPositionWrite ( 0,1 );
@@ -104,11 +98,8 @@ void checkWiperSubsystem() {
 
     switch(motorState) {
         case IDLE:
-            uartUsb.write("IDLE MODE\r\n", 11);
-            uartUsb.write(modeToString().c_str(), 6);
             accumulatedTime = 0;
-            if(!isEngineOn() || selectedMode == OFF) {
-                uartUsb.write("--\r\n", 4);
+            if(!isEngineOn() || selectedMode == W_OFF) {
                 motorState = IDLE;
             } else {
                 if(selectedMode == HI) {
@@ -120,10 +111,8 @@ void checkWiperSubsystem() {
                 }
             }
             wiperMotor.write(DUTY_STOP);
-            redLED = OFF;
             break;
         case HI_DIR1:
-            redLED = ON;
             if(accumulatedTime >= HD1_TIME) {
                 motorState = HI_DIR2;
             }
@@ -133,7 +122,6 @@ void checkWiperSubsystem() {
             wiperMotor.write(HI_DUMIN);
             break;
         case HI_DIR2:
-            redLED = OFF;
             if(accumulatedTime >= HD2_TIME + HD1_TIME) {
                 if(selectedMode == HI) {
                     accumulatedTime = 0;
@@ -148,7 +136,6 @@ void checkWiperSubsystem() {
             wiperMotor.write(HI_DUMAX);
             break;
         case LO_DIR1:
-            greenLED = ON;
             if(accumulatedTime >= LD1_TIME) {
                 motorState = LO_DIR2;
             }
@@ -158,7 +145,6 @@ void checkWiperSubsystem() {
             wiperMotor.write(LO_DUMIN);
             break;
         case LO_DIR2:
-            greenLED = OFF;
             if(accumulatedTime >= LD2_TIME + LD1_TIME) {
                 if(selectedMode == LO) {
                     accumulatedTime = 0;            
