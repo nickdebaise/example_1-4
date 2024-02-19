@@ -11,19 +11,16 @@
 //=====[Declaration of private defines]========================================
 
 #define PERIOD 0.02
-#define DUTY_STOP 0.025
+#define DUTY_MIN 0.0325
+#define DUTY_MAX 0.0675
 
-#define HI_DUMIN 0.025
-#define HI_DUMAX 0.115
 #define HD1_TIME 140
 #define HD2_TIME 140
 
-#define LO_DUMIN 0.025
-#define LO_DUMAX 0.115
-#define LD1_TIME 210
-#define LD2_TIME 210
+#define LD1_TIME 280
+#define LD2_TIME 280
 
-#define STEP_SIZE 9
+#define STEP_SIZE 50
 #define LO_DELAY LD1_TIME / STEP_SIZE
 
 //=====[Declaration of private data types]=====================================
@@ -63,9 +60,9 @@ motorState_t motorState = IDLE;
 int accumulatedTime = 0;
 float accumulatedLoStepTime = 0;
 
-float currLoStep = LO_DUMIN;
+float currLoStep = DUTY_MIN;
 
-const float stepSize = LO_DUMAX - LO_DUMIN / STEP_SIZE;
+const float stepSize = (DUTY_MAX - DUTY_MIN) / STEP_SIZE;
 
 //=====[Declarations (prototypes) of private functions]========================
 
@@ -108,7 +105,7 @@ void checkWiperSubsystem() {
         case IDLE:
             accumulatedTime = 0;
             accumulatedLoStepTime = 0;
-            currLoStep = LO_DUMIN;
+            currLoStep = DUTY_MIN;
 
             if(!isEngineOn() || selectedMode == W_OFF) {
                 motorState = IDLE;
@@ -121,7 +118,7 @@ void checkWiperSubsystem() {
                     motorState = INT_DIR1;
                 }
             }
-            wiperMotor.write(DUTY_STOP);
+            wiperMotor.write(DUTY_MIN);
             break;
         case HI_DIR1:
             if(accumulatedTime >= HD1_TIME) {
@@ -130,7 +127,7 @@ void checkWiperSubsystem() {
 
             accumulatedTime += SYSTEM_DELAY_TIME;
 
-            wiperMotor.write(HI_DUMIN);
+            wiperMotor.write(DUTY_MIN);
             break;
         case HI_DIR2:
             if(accumulatedTime >= HD2_TIME + HD1_TIME) {
@@ -144,37 +141,34 @@ void checkWiperSubsystem() {
 
             accumulatedTime += SYSTEM_DELAY_TIME;
 
-            wiperMotor.write(HI_DUMAX);
+            wiperMotor.write(DUTY_MAX);
             break;
         case LO_DIR1:
             if(accumulatedTime >= LD1_TIME) {
                 motorState = LO_DIR2;
-            }
-
-            if(accumulatedLoStepTime >= (int)LO_DELAY) {
+                currLoStep = DUTY_MAX;
+            } else if(accumulatedLoStepTime >= (int)LO_DELAY) {
                 accumulatedLoStepTime = 0;
-                currLoStep += stepSize;
+                if(currLoStep < DUTY_MAX) {
+                    currLoStep += stepSize;
+                }
             }
 
             accumulatedTime += SYSTEM_DELAY_TIME;
             accumulatedLoStepTime += SYSTEM_DELAY_TIME;
 
             wiperMotor.write(currLoStep);
-            
             break;
         case LO_DIR2:
             if(accumulatedTime >= LD2_TIME + LD1_TIME) {
-                if(selectedMode == LO) {
-                    accumulatedTime = 0;            
-                    motorState = LO_DIR1;
-                } else {
-                    motorState = IDLE;
-                }
-            }
-
-            if(accumulatedLoStepTime >= (int)LO_DELAY) {
+                motorState = IDLE;
+                accumulatedTime = 0;            
+                currLoStep = DUTY_MIN;
+            } else if(accumulatedLoStepTime >= (int)LO_DELAY) {
                 accumulatedLoStepTime = 0;
-                currLoStep -= stepSize;
+                if(currLoStep > DUTY_MIN) {
+                    currLoStep -= stepSize;
+                }
             }
 
             accumulatedTime += SYSTEM_DELAY_TIME;
@@ -183,32 +177,51 @@ void checkWiperSubsystem() {
             wiperMotor.write(currLoStep);
             break; 
         case INT_DIR1:
+
             if(accumulatedTime >= LD1_TIME) {
                 motorState = INT_DIR2;
+                currLoStep = DUTY_MAX;
+            } else if(accumulatedLoStepTime >= (int)LO_DELAY) {
+                accumulatedLoStepTime = 0;
+                if(currLoStep < DUTY_MAX) {
+                    currLoStep += stepSize;
+                }
             }
+
             accumulatedTime += SYSTEM_DELAY_TIME;
-            wiperMotor.write(LO_DUMIN);
+            accumulatedLoStepTime += SYSTEM_DELAY_TIME;
+
+            wiperMotor.write(currLoStep);
             break;
         case INT_DIR2:
+
             if(accumulatedTime >= LD2_TIME + LD1_TIME) {
                 motorState = INT_WAIT;
+                accumulatedTime = 0;            
+                currLoStep = DUTY_MIN;
+            } else if(accumulatedLoStepTime >= (int)LO_DELAY) {
+                accumulatedLoStepTime = 0;
+                if(currLoStep > DUTY_MIN) {
+                    currLoStep -= stepSize;
+                }
             }
+
             accumulatedTime += SYSTEM_DELAY_TIME;
-            wiperMotor.write(LO_DUMAX);
+            accumulatedLoStepTime += SYSTEM_DELAY_TIME;
+
+            wiperMotor.write(currLoStep);
             break;
         case INT_WAIT:
             if(!isEngineOn() || selectedMode != INT) {
                 motorState = IDLE;
             }
 
-            if(accumulatedTime >= LD1_TIME + LD2_TIME + mapIntervalToMs(selectedIntMode)) {
+            if(accumulatedTime >= mapIntervalToMs(selectedIntMode)) {
                 accumulatedTime = 0;
                 motorState = INT_DIR1;
             }
 
             accumulatedTime += SYSTEM_DELAY_TIME;
-
-            wiperMotor.write(DUTY_STOP);
     }
 
 }
@@ -251,55 +264,34 @@ string modeToString() {
         case HI:
             return "High";
         case LO:
-            return "Low";
+            return "Low ";
         case INT:
             return "Int.";
         default:
-            return "Off";
+            return "Off ";
     }
 }
 
 string intervalToString() {
     switch(selectedIntMode) {
         case SHORT:
-            return "Short";
+            return "Short ";
         case MEDIUM:
             return "Medium";
         default:
-            return "Long";
+            return "Long  ";
     }
 }
 
 int mapIntervalToMs(intervalSelector_t intervalMode) {
     switch(intervalMode) {
         case SHORT:
-            return 3 * 1000;
+            return 3 * 100;
         case MEDIUM:
-            return 6 * 1000;
+            return 6 * 100;
         default: 
-            return 9 * 1000;
+            return 8 * 100;
     }
 }
 
 
-
-void controlServoSpeed(float startPos, float endPos, int delayTime) {
-    float stepSize = 0.115 - 0.025 / 9;
-    float currStep = startPos;
-    // for every step, increase currStep by stepSize and move motor to currStep
-    // delay by x ms for each cycle
-    if(startPos < endPos) {
-        for(int i = 0; i < 9; i++) {
-            wiperMotor.write(currStep);
-            currStep += stepSize;
-            delay(delayTime);
-        }
-    } else {
-        for(int i = 0; i < 9; i++) {
-            wiperMotor.write(currStep);
-            currStep -= stepSize;
-            delay(delayTime);
-        }
-    }
-    
-}
