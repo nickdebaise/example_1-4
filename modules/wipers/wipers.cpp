@@ -131,7 +131,9 @@ void checkWiperSubsystem() {
             break;
         case HI_DIR2:
             if(accumulatedTime >= HD2_TIME + HD1_TIME) {
-                if(selectedMode == HI) {
+                if(!isEngineOn()) {
+                    motorState = IDLE;
+                } else if(selectedMode == HI) {
                     accumulatedTime = 0;
                     motorState = HI_DIR1;
                 } else {
